@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.screenmirror.app-mergeDebugResources-33:/layout/activity_main.xml",
+        "source": "com.screenmirror.app-main-36:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-mergeDebugResources-33:/layout/activity_main.xml",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/layout/activity_main.xml"
+    }
+]

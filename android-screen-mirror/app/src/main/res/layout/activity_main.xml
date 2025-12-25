@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".MainActivity">
+
+    <!-- Background Gradient -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/background_gradient"
+        android:alpha="0.8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Video Surface for Screen Mirroring -->
+    <SurfaceView
+        android:id="@+id/videoSurface"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Main Content Layout (AirScreen Style) -->
+    <LinearLayout
+        android:id="@+id/mainContentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="32dp"
+        android:weightSum="2">
+
+        <!-- Left Side: Device Info & Status -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="16dp"
+            app:cardBackgroundColor="#2A2A2A"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/appTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Screen Mirroring"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+                
+                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Receiver"
+                    android:textColor="@color/accent_cyan"
+                    android:textSize="18sp"
+                    android:layout_marginBottom="48dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="32dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/device_name"
+                        android:textColor="#AAAAAA"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/deviceName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Android TV"
+                        android:textColor="@color/white"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="32dp">
+                    
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        
+                         <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_wifi_icon" 
+                            app:tint="@color/accent_cyan"
+                            android:layout_marginEnd="8dp"/>
+                            
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Wi-Fi"
+                            android:textColor="#AAAAAA"
+                            android:textSize="14sp" />
+                            
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/localhostAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="192.168.1.100"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:fontFamily="monospace"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                 <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    
+                     <View
+                        android:id="@+id/statusIndicator"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:background="@drawable/status_indicator_disconnected"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/statusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ready_to_connect"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Right Side: Instructions & QR (Placeholder) -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            app:cardBackgroundColor="#2A2A2A"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="How to Connect"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="32dp" />
+
+                <!-- Step 1 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="24dp">
+                    
+                    <TextView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="1"
+                        android:textColor="@color/black"
+                        android:background="@drawable/circle_background_cyan"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="16dp" />
+                        
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Make sure your device is connected to the same Wi-Fi network."
+                        android:textColor="#DDDDDD"
+                        android:textSize="16sp"
+                        android:layout_gravity="center_vertical"/>
+                </LinearLayout>
+
+                <!-- Step 2 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="24dp">
+
+                    <TextView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="2"
+                        android:textColor="@color/black"
+                        android:background="@drawable/circle_background_cyan"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Open Control Center on your Apple device and tap 'Screen Mirroring'."
+                        android:textColor="#DDDDDD"
+                        android:textSize="16sp"
+                        android:layout_gravity="center_vertical"/>
+                </LinearLayout>
+
+                <!-- Step 3 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="3"
+                        android:textColor="@color/black"
+                        android:background="@drawable/circle_background_cyan"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select the device name shown on the left."
+                        android:textColor="#DDDDDD"
+                        android:textSize="16sp"
+                        android:layout_gravity="center_vertical"/>
+                </LinearLayout>
+                
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+                    
+                 <TextView
+                    android:id="@+id/helpText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Waiting for connection..."
+                    android:textColor="@color/accent_cyan"
+                    android:textSize="16sp"
+                    android:textStyle="italic" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+    <!-- Main Card (Hidden/Replaced by new layout but keeping ID refs for code compatibility if needed, or better to remove ref from activity) -->
+    <!-- Actually, better to remove the old mainCard ID and update the Activity code if it crashes.
+         But let's check MainActivity.kt usage. It uses mainCard.visibility = View.VISIBLE
+         We should rename the LinearLayout above to mainCard to minimize code changes or update code.
+         Let's update code to point mainCard to mainContentLayout. -->
+         
+     <!-- Update: I used mainContentLayout ID above. I need to update MainActivity to use that or map mainCard to it.
+          Let's check MainActivity.kt again. -->
+
+    <!-- Status Bar Overlay (when connected) -->
+    <LinearLayout
+        android:id="@+id/statusBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#99000000"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <View
+            android:id="@+id/statusBarIndicator"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/status_indicator_connected"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:id="@+id/statusBarText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/mirroring_active"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/networkSpeed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-- Mbps"
+            android:textColor="#DDDDDD"
+            android:textSize="12sp"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/fpsCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-- FPS"
+            android:textColor="#DDDDDD"
+            android:textSize="12sp"
+            android:layout_marginEnd="16dp" />
+
+        <Button
+            android:id="@+id/disconnectButtonBar"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="@string/disconnect"
+            android:textSize="12sp"
+            android:background="@drawable/button_disconnect_small"
+            android:textColor="@color/white"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:gravity="center" />
+    </LinearLayout>
+    
+    <!-- Hidden legacy views to prevent crash if not updated in code yet -->
+    <ProgressBar
+        android:id="@+id/connectionProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:ignore="MissingConstraints" />
+        
+    <Button
+        android:id="@+id/connectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:ignore="MissingConstraints" />
+        
+    <Button
+        android:id="@+id/disconnectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:ignore="MissingConstraints" />
+        
+    <androidx.cardview.widget.CardView
+        android:id="@+id/mainCard" 
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        tools:ignore="MissingConstraints"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

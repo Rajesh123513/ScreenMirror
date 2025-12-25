@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Screen Mirror</string>
+    <string name="waiting_for_connection">Waiting for connection…</string>
+    <string name="ready_to_connect">Ready to Connect</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="device_name">Device Name</string>
+    <string name="localhost_address">This Device</string>
+    <string name="ip_address">IP Address</string>
+    <string name="network_speed">Network Speed</string>
+    <string name="mbps">Mbps</string>
+    <string name="searching_for_devices">Searching for devices…</string>
+    <string name="no_devices_found">No devices found</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="connecting">Connecting…</string>
+    <string name="mirroring_active">Screen Mirroring Active</string>
+    <string name="tap_to_connect">Tap to connect from your Mac</string>
+    <string name="waiting_for_mac_connection">Waiting for Mac to connect…</string>
+    <string name="use_mac_screen_mirroring">Use Mac Screen Mirroring to connect\nNo installation needed on Mac</string>
+    <string name="status">Status</string>
+    <string name="fps">FPS</string>
+</resources>
+

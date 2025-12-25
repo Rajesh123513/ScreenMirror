@@ -1,0 +1,58 @@
+[
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_status_indicator_error.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/status_indicator_error.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/layout_activity_main.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.screenmirror.app-merged_res-34:/drawable_ic_wifi_icon.xml.flat",
+        "source": "com.screenmirror.app-main-36:/drawable/ic_wifi_icon.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_button_disconnect_small.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/button_disconnect_small.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_info_section_background.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/info_section_background.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_status_indicator_connected.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/status_indicator_connected.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_button_disconnect.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/button_disconnect.xml"
+    },
+    {
+        "merged": "com.screenmirror.app-merged_res-34:/drawable_circle_background_cyan.xml.flat",
+        "source": "com.screenmirror.app-main-36:/drawable/circle_background_cyan.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_background_gradient.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/background_gradient.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_status_indicator_disconnected.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/status_indicator_disconnected.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-merged_res-34:/drawable_button_connect.xml.flat",
+        "source": "/Users/rajeshpothunuri/.gradle/daemon/9.0-milestone-1/com.screenmirror.app-main-36:/drawable/button_connect.xml"
+    }
+]
