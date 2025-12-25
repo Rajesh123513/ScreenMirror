@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Screen Mirror Sender</title>
+</head>
+<body>
+  <h1>Screen Mirror Sender</h1>
+  <p>Enter TV WebSocket URL (ws://IP:9000) and press Start.</p>
+  <div>
+    <input id="wsUrl" type="text" placeholder="ws://10.0.0.53:9000" style="width:300px" />
+    <button id="start">Start</button>
+  </div>
+  <div style="margin-top:12px">
+    <label>STUN/TURN (JSON array of ICE servers):</label><br/>
+    <textarea id="iceConfig" rows="3" style="width:360px">[{"urls":"stun:stun.l.google.com:19302"}]</textarea>
+  </div>
+  <div style="margin-top:8px">
+    <label>Max bitrate (kbps, 0 = auto):</label>
+    <input id="bitrate" type="number" value="0" style="width:120px" />
+  </div>
+  <script src="client.js"></script>
+</body>
+</html>

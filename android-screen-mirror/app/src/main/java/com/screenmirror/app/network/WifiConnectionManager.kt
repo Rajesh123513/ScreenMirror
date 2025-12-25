@@ -19,11 +19,30 @@ class WifiConnectionManager(
     
     fun getLocalIpAddress(): String? {
         try {
+            // Prefer WifiManager's IP (works reliably on Android TV with Wi-Fi)
+            try {
+                val wifiInfo = wifiManager.connectionInfo
+                val intIp = wifiInfo.ipAddress
+                if (intIp != 0) {
+                    val ip = String.format(
+                        "%d.%d.%d.%d",
+                        intIp and 0xff,
+                        intIp shr 8 and 0xff,
+                        intIp shr 16 and 0xff,
+                        intIp shr 24 and 0xff
+                    )
+                    Log.d(TAG, "Found local IP via WifiManager: $ip")
+                    return ip
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "WifiManager IP lookup failed, falling back to interfaces", e)
+            }
+
             val interfaces = NetworkInterface.getNetworkInterfaces()
             while (interfaces.hasMoreElements()) {
                 val networkInterface = interfaces.nextElement()
                 val addresses = networkInterface.inetAddresses
-                
+
                 while (addresses.hasMoreElements()) {
                     val address = addresses.nextElement()
                     if (!address.isLoopbackAddress && address is Inet4Address) {
@@ -40,29 +59,15 @@ class WifiConnectionManager(
     }
     
     fun startServer() {
+        // We no longer open a ServerSocket here to avoid conflicting with
+        // the dedicated signaling WebSocket server. Just report local IP.
         executor.execute {
             try {
-                serverSocket = ServerSocket(8080)
                 isRunning = true
-                Log.d(TAG, "Server started on port 8080")
-                
                 val localIp = getLocalIpAddress()
-                localIp?.let { onIpAddressFound(it) }
-                
-                while (isRunning) {
-                    try {
-                        val clientSocket = serverSocket?.accept()
-                        Log.d(TAG, "Client connected: ${clientSocket?.inetAddress}")
-                        // Handle client connection if needed
-                        clientSocket?.close()
-                    } catch (e: Exception) {
-                        if (isRunning) {
-                            Log.e(TAG, "Error accepting connection", e)
-                        }
-                    }
-                }
+                localIp?.let { onIpAddressFound("$it:9000") }
             } catch (e: Exception) {
-                Log.e(TAG, "Error starting server", e)
+                Log.e(TAG, "Error starting server (reporting IP)", e)
             }
         }
     }
@@ -99,7 +104,7 @@ class WifiConnectionManager(
             for (ip in candidates) {
                 try {
                     val socket = Socket()
-                    socket.connect(InetSocketAddress(ip, 8080), 500) // 500ms timeout
+                    socket.connect(InetSocketAddress(ip, 9000), 500) // 500ms timeout
                     socket.close()
                     Log.d(TAG, "Found device at: $ip")
                     return@withContext ip

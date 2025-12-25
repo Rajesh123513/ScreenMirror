@@ -3201,6 +3201,7 @@ id baseline
 id beginOnFirstDraw
 id beginning
 id bestChoice
+id bitrateDisplay
 id blocking
 id bottom
 id bounce

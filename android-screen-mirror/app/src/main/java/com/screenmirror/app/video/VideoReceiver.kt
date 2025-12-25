@@ -37,13 +37,32 @@ class VideoReceiver(
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 Log.d(TAG, "Connecting to $ipAddress:$port")
-                tcpSocket = Socket(ipAddress, port)
-                inputStream = DataInputStream(tcpSocket?.getInputStream())
-                isReceiving = true
-                
+                var attempts = 0
+                val maxAttempts = 4
+                var connected = false
+                while (attempts < maxAttempts && !connected) {
+                    try {
+                        tcpSocket = Socket(ipAddress, port)
+                        inputStream = DataInputStream(tcpSocket?.getInputStream())
+                        isReceiving = true
+                        connected = true
+                    } catch (e: Exception) {
+                        attempts++
+                        val backoff = 200L * attempts
+                        Log.w(TAG, "Connection attempt $attempts failed, retrying in ${backoff}ms", e)
+                        Thread.sleep(backoff)
+                    }
+                }
+
+                if (!connected) {
+                    onConnectionStateChanged(false)
+                    Log.e(TAG, "Failed to connect after $maxAttempts attempts")
+                    return@launch
+                }
+
                 onConnectionStateChanged(true)
                 Log.d(TAG, "Connected successfully")
-                
+
                 startReceivingTCP()
             } catch (e: Exception) {
                 Log.e(TAG, "Error connecting", e)
@@ -90,12 +109,12 @@ class VideoReceiver(
                     val frameSize = inputStream?.readInt() ?: break
                     
                     if (frameSize <= 0 || frameSize > MAX_FRAME_SIZE) {
-                        // Might not be our custom protocol. 
-                        // If connecting from real AirPlay, this will fail here.
-                        // We would need to implement the AirPlay decryptor here.
+                        // Invalid frame size — likely a protocol mismatch or transient error.
+                        // Don't hard-break; attempt to continue receiving to avoid a black
+                        // screen. If the stream is truly incompatible we'll eventually
+                        // get an exception and reconnect.
                         Log.w(TAG, "Invalid frame size or protocol mismatch: $frameSize")
-                        // Attempt to resync or break
-                        break
+                        continue
                     }
                     
                     // Read frame data

@@ -4,7 +4,7 @@
             "outputFile": "com.screenmirror.app-mergeDebugResources-32:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "/Users/rajeshpothunuri/.gradle/caches/9.0-milestone-1/transforms/6d3b3cb1ee12db3b50f8898ca61e50cf/transformed/core-1.12.0/res/values-v16/values-v16.xml",
+                    "source": "/Users/rajeshpothunuri/.gradle/caches/transforms-3/db3f6b8020888a7f113f2982cc217484/transformed/core-1.12.0/res/values-v16/values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "/Users/rajeshpothunuri/.gradle/caches/9.0-milestone-1/transforms/ef383254d7ed336647320bff66369b36/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "source": "/Users/rajeshpothunuri/.gradle/caches/transforms-3/1390ed0e93696117e0bd1340aa2458d6/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

@@ -64,4 +64,9 @@ dependencies {
 
     // JmDNS for mDNS service discovery
     implementation 'javax.jmdns:jmdns:3.4.1'
+        // WebRTC (Google)
+        // https://mvnrepository.com/artifact/io.github.webrtc-sdk/android
+        implementation("io.github.webrtc-sdk:android:137.7151.05")
+        // Simple Java WebSocket server for signaling
+        implementation 'org.java-websocket:Java-WebSocket:1.5.3'
 }

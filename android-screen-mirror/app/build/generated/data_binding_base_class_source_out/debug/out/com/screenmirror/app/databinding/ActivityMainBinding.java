@@ -2,7 +2,6 @@
 package com.screenmirror.app.databinding;
 
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -19,6 +18,7 @@ import com.screenmirror.app.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
 import java.lang.String;
+import org.webrtc.SurfaceViewRenderer;
 
 public final class ActivityMainBinding implements ViewBinding {
   @NonNull
@@ -26,6 +26,9 @@ public final class ActivityMainBinding implements ViewBinding {
 
   @NonNull
   public final TextView appTitle;
+
+  @NonNull
+  public final TextView bitrateDisplay;
 
   @NonNull
   public final Button connectButton;
@@ -76,19 +79,21 @@ public final class ActivityMainBinding implements ViewBinding {
   public final TextView statusText;
 
   @NonNull
-  public final SurfaceView videoSurface;
+  public final SurfaceViewRenderer videoSurface;
 
   private ActivityMainBinding(@NonNull ConstraintLayout rootView, @NonNull TextView appTitle,
-      @NonNull Button connectButton, @NonNull ProgressBar connectionProgress,
-      @NonNull TextView deviceName, @NonNull Button disconnectButton,
-      @NonNull Button disconnectButtonBar, @NonNull TextView fpsCounter, @NonNull TextView helpText,
-      @NonNull TextView localhostAddress, @NonNull CardView mainCard,
-      @NonNull LinearLayout mainContentLayout, @NonNull TextView networkSpeed,
-      @NonNull LinearLayout statusBar, @NonNull View statusBarIndicator,
-      @NonNull TextView statusBarText, @NonNull View statusIndicator, @NonNull TextView statusText,
-      @NonNull SurfaceView videoSurface) {
+      @NonNull TextView bitrateDisplay, @NonNull Button connectButton,
+      @NonNull ProgressBar connectionProgress, @NonNull TextView deviceName,
+      @NonNull Button disconnectButton, @NonNull Button disconnectButtonBar,
+      @NonNull TextView fpsCounter, @NonNull TextView helpText, @NonNull TextView localhostAddress,
+      @NonNull CardView mainCard, @NonNull LinearLayout mainContentLayout,
+      @NonNull TextView networkSpeed, @NonNull LinearLayout statusBar,
+      @NonNull View statusBarIndicator, @NonNull TextView statusBarText,
+      @NonNull View statusIndicator, @NonNull TextView statusText,
+      @NonNull SurfaceViewRenderer videoSurface) {
     this.rootView = rootView;
     this.appTitle = appTitle;
+    this.bitrateDisplay = bitrateDisplay;
     this.connectButton = connectButton;
     this.connectionProgress = connectionProgress;
     this.deviceName = deviceName;
@@ -138,6 +143,12 @@ public final class ActivityMainBinding implements ViewBinding {
       id = R.id.appTitle;
       TextView appTitle = ViewBindings.findChildViewById(rootView, id);
       if (appTitle == null) {
+        break missingId;
+      }
+
+      id = R.id.bitrateDisplay;
+      TextView bitrateDisplay = ViewBindings.findChildViewById(rootView, id);
+      if (bitrateDisplay == null) {
         break missingId;
       }
 
@@ -238,15 +249,15 @@ public final class ActivityMainBinding implements ViewBinding {
       }
 
       id = R.id.videoSurface;
-      SurfaceView videoSurface = ViewBindings.findChildViewById(rootView, id);
+      SurfaceViewRenderer videoSurface = ViewBindings.findChildViewById(rootView, id);
       if (videoSurface == null) {
         break missingId;
       }
 
-      return new ActivityMainBinding((ConstraintLayout) rootView, appTitle, connectButton,
-          connectionProgress, deviceName, disconnectButton, disconnectButtonBar, fpsCounter,
-          helpText, localhostAddress, mainCard, mainContentLayout, networkSpeed, statusBar,
-          statusBarIndicator, statusBarText, statusIndicator, statusText, videoSurface);
+      return new ActivityMainBinding((ConstraintLayout) rootView, appTitle, bitrateDisplay,
+          connectButton, connectionProgress, deviceName, disconnectButton, disconnectButtonBar,
+          fpsCounter, helpText, localhostAddress, mainCard, mainContentLayout, networkSpeed,
+          statusBar, statusBarIndicator, statusBarText, statusIndicator, statusText, videoSurface);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

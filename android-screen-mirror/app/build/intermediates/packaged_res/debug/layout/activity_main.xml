@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Video Surface for Screen Mirroring -->
-    <SurfaceView
+    <org.webrtc.SurfaceViewRenderer
         android:id="@+id/videoSurface"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -336,6 +336,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="-- FPS"
+            android:textColor="#DDDDDD"
+            android:textSize="12sp"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/bitrateDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-- kbps"
             android:textColor="#DDDDDD"
             android:textSize="12sp"
             android:layout_marginEnd="16dp" />

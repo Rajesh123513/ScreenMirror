@@ -32,7 +32,7 @@ import java.net.InetAddress
 
 class MainActivity : AppCompatActivity() {
     
-    private lateinit var videoSurface: SurfaceView
+    private lateinit var videoSurface: org.webrtc.SurfaceViewRenderer
     private lateinit var statusText: TextView
     private lateinit var statusIndicator: View
     private lateinit var statusBar: View
@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var localhostAddress: TextView
     private lateinit var networkSpeed: TextView
     private lateinit var fpsCounter: TextView
+    private lateinit var bitrateDisplay: TextView
     private lateinit var disconnectButtonBar: Button
     private lateinit var helpText: TextView
     private lateinit var mainContentLayout: View
@@ -52,6 +53,8 @@ class MainActivity : AppCompatActivity() {
     private var networkSpeedMonitor: NetworkSpeedMonitor? = null
     private var airPlayReceiver: AirPlayReceiver? = null
     private var multicastLock: WifiManager.MulticastLock? = null
+    private var signalingServer: com.screenmirror.app.signaling.SignalingServer? = null
+    private var webRtcClient: com.screenmirror.app.webrtc.WebRTCClient? = null
     
     private val PERMISSIONS_REQUEST_CODE = 1001
     
@@ -99,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         localhostAddress = findViewById(R.id.localhostAddress)
         networkSpeed = findViewById(R.id.networkSpeed)
         fpsCounter = findViewById(R.id.fpsCounter)
+        bitrateDisplay = findViewById(R.id.bitrateDisplay)
         disconnectButtonBar = findViewById(R.id.disconnectButtonBar)
         helpText = findViewById(R.id.helpText)
         mainContentLayout = findViewById(R.id.mainContentLayout)
@@ -157,34 +161,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        videoSurface.holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                // Pass surface to AirPlayReceiver if it's active
-                airPlayReceiver?.setSurface(holder.surface)
-                
-                // Keep videoReceiver for legacy/custom connections if needed
-                videoReceiver = VideoReceiver(
-                    holder.surface,
-                    onConnectionStateChanged = { isConnected ->
-                        runOnUiThread {
-                            updateConnectionStatus(isConnected)
-                        }
-                    },
-                    onFpsUpdate = { fps ->
-                        runOnUiThread {
-                            updateFps(fps)
-                        }
-                    }
-                )
-            }
-            
-            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
-            override fun surfaceDestroyed(holder: SurfaceHolder) {
-                videoReceiver?.disconnect()
-                videoReceiver = null
-                airPlayReceiver?.setSurface(holder.surface) // Will likely be invalid or null
-            }
-        })
+        // Initialize SurfaceViewRenderer for WebRTC remote rendering
+        videoSurface.init(org.webrtc.EglBase.create().eglBaseContext, null)
+        videoSurface.setMirror(false)
+        videoSurface.setZOrderMediaOverlay(true)
+
+        // Keep videoReceiver for legacy/custom connections if needed (not used for WebRTC)
+        videoReceiver = null
         
         networkSpeedMonitor = NetworkSpeedMonitor(this) { speed ->
             runOnUiThread {
@@ -205,20 +188,107 @@ class MainActivity : AppCompatActivity() {
                     updateLocalhostAddress(it)
                 }
                 
-                // Start AirPlay receiver - makes TV discoverable by Mac
-                airPlayReceiver = AirPlayReceiver(this@MainActivity) { socket ->
-                    // Mac connected via AirPlay Handshake (TCP)
-                    runOnUiThread {
-                        handleMacConnection(socket)
+                // Start WebSocket signaling server for WebRTC-based mirroring
+                signalingServer = com.screenmirror.app.signaling.SignalingServer(9000)
+                signalingServer?.start()
+
+                // Create WebRTC client to handle offers from browser
+                webRtcClient = com.screenmirror.app.webrtc.WebRTCClient(this@MainActivity)
+                webRtcClient?.init()
+                // Provide the SurfaceViewRenderer for rendering remote video
+                webRtcClient?.setSurfaceViewRenderer(videoSurface)
+                webRtcClient?.createPeerConnection()
+
+                // Forward ICE candidates from WebRTC client to signaling
+                webRtcClient?.onIceCandidate = { candidate ->
+                    try {
+                        val c = mapOf(
+                            "type" to "candidate",
+                            "sdpMid" to candidate.sdpMid,
+                            "sdpMLineIndex" to candidate.sdpMLineIndex,
+                            "candidate" to candidate.sdp
+                        )
+                        // Broadcast to connected clients (usually single)
+                        signalingServer?.broadcast(c)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error sending local candidate", e)
                     }
                 }
-                
-                // Ensure we pass the surface if it's already created
-                if (videoSurface.holder.surface.isValid) {
-                     airPlayReceiver?.setSurface(videoSurface.holder.surface)
+
+                signalingServer?.onMessage = { msg, conn ->
+                    try {
+                        val gson = com.google.gson.Gson()
+                        val map = gson.fromJson(msg, Map::class.java)
+                        val type = map["type"] as? String
+                        when (type) {
+                            "offer" -> {
+                                val sdp = map["sdp"] as? String ?: ""
+                                webRtcClient?.handleOffer(sdp, { answerSdp ->
+                                    val resp = mapOf("type" to "answer", "sdp" to answerSdp)
+                                    signalingServer?.send(conn, resp)
+                                }, { candidate ->
+                                    val c = mapOf(
+                                        "type" to "candidate",
+                                        "sdpMid" to candidate.sdpMid,
+                                        "sdpMLineIndex" to candidate.sdpMLineIndex,
+                                        "candidate" to candidate.sdp
+                                    )
+                                    signalingServer?.send(conn, c)
+                                })
+                            }
+                            "candidate" -> {
+                                val sdpMid = map["sdpMid"] as? String ?: ""
+                                val sdpMLineIndex = (map["sdpMLineIndex"] as? Double)?.toInt() ?: 0
+                                val candidate = map["candidate"] as? String ?: ""
+                                webRtcClient?.addIceCandidate(sdpMid, sdpMLineIndex, candidate)
+                            }
+                            "ice-config" -> {
+                                // Recreate PeerConnection with provided ICE servers
+                                try {
+                                    val iceList = map["iceServers"] as? List<*>
+                                    val iceServers = mutableListOf<org.webrtc.PeerConnection.IceServer>()
+                                    iceList?.forEach { item ->
+                                        val m = item as? Map<*, *>
+                                        val url = m?.get("urls") as? String
+                                        val username = m?.get("username") as? String
+                                        val credential = m?.get("credential") as? String
+                                        if (!url.isNullOrEmpty()) {
+                                            val builder = org.webrtc.PeerConnection.IceServer.builder(url)
+                                            if (!username.isNullOrEmpty()) builder.setUsername(username)
+                                            if (!credential.isNullOrEmpty()) builder.setPassword(credential)
+                                            iceServers.add(builder.createIceServer())
+                                        }
+                                    }
+                                    webRtcClient?.close()
+                                    webRtcClient = com.screenmirror.app.webrtc.WebRTCClient(this@MainActivity)
+                                    webRtcClient?.init()
+                                    webRtcClient?.setSurfaceViewRenderer(videoSurface)
+                                    webRtcClient?.createPeerConnection(iceServers)
+                                    webRtcClient?.onIceCandidate = { candidate ->
+                                        val c = mapOf(
+                                            "type" to "candidate",
+                                            "sdpMid" to candidate.sdpMid,
+                                            "sdpMLineIndex" to candidate.sdpMLineIndex,
+                                            "candidate" to candidate.sdp
+                                        )
+                                        signalingServer?.broadcast(c)
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Error applying ice-config", e)
+                                }
+                            }
+                            "set-bitrate" -> {
+                                val kbps = (map["kbps"] as? Double)?.toInt() ?: 0
+                                webRtcClient?.maxBitrateKbps = kbps
+                                runOnUiThread {
+                                    bitrateDisplay.text = if (kbps > 0) "${kbps} kbps" else "auto"
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e(TAG, "Error handling signaling message", e)
+                    }
                 }
-                
-                airPlayReceiver?.start()
                 
                 // Start network monitoring
                 networkSpeedMonitor?.startMonitoring()
@@ -314,6 +384,8 @@ class MainActivity : AppCompatActivity() {
         networkSpeedMonitor?.stopMonitoring()
         connectionManager?.stopServer()
         airPlayReceiver?.stop()
+        signalingServer?.stop()
+        webRtcClient?.close()
         if (multicastLock != null && multicastLock!!.isHeld) {
             multicastLock!!.release()
         }

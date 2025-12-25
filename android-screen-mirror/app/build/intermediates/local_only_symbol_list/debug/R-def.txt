@@ -35,6 +35,7 @@ drawable status_indicator_connected
 drawable status_indicator_disconnected
 drawable status_indicator_error
 id appTitle
+id bitrateDisplay
 id connectButton
 id connectionProgress
 id deviceName

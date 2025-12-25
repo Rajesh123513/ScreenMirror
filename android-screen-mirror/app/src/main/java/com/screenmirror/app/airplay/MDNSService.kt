@@ -1,7 +1,8 @@
 package com.screenmirror.app.airplay
 
 import android.content.Context
-import android.net.wifi.WifiManager
+import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import java.net.InetAddress
 import java.net.NetworkInterface
@@ -11,13 +12,22 @@ import java.util.concurrent.Executors
 
 /**
  * mDNS/Bonjour service discovery using JmDNS
- * Makes the Android TV discoverable as "Android TV" in Mac's AirPlay menu
+ * Makes the Android TV discoverable as the actual device name in Mac's AirPlay menu
  */
 class MDNSService(private val context: Context) {
     private val executor = Executors.newSingleThreadExecutor()
     private var jmdns: JmDNS? = null
     private var isRunning = false
-    private val deviceName = "Android TV"
+    
+    // Fetch actual device name
+    private val deviceName: String
+        get() {
+            var name = Settings.Global.getString(context.contentResolver, "device_name")
+            if (name.isNullOrEmpty()) {
+                name = Build.MODEL
+            }
+            return name ?: "Android TV"
+        }
     
     companion object {
         private const val TAG = "MDNSService"
@@ -41,73 +51,36 @@ class MDNSService(private val context: Context) {
                 Log.d(TAG, "Starting JmDNS on address: ${localIpAddress.hostAddress}")
                 
                 // Create JmDNS instance
-                // Use a safe hostname without spaces
-                jmdns = JmDNS.create(localIpAddress, "AndroidTV")
+                // Hostname must be safe (no spaces, alphanumeric)
+                val safeHostName = deviceName.replace("[^a-zA-Z0-9]".toRegex(), "")
+                jmdns = JmDNS.create(localIpAddress, safeHostName)
 
+                val currentDeviceName = deviceName
                 val deviceId = getDeviceIdAsMac()
                 // Features bitmask: 0x5A7FFFF7
-                // This indicates support for video v2, audio, screen mirroring, etc.
                 val features = "0x5A7FFFF7" 
                 
-                // 1. Register AirPlay Service (_airplay._tcp.local.)
-                val airplayProps = hashMapOf(
+                // Instead of falsely advertising as AirPlay/RAOP (which requires
+                // implementing the full/proprietary AirPlay protocol), register a
+                // custom service so clients won't try native AirPlay and fail.
+                val customPort = 9000
+                val customProps = hashMapOf(
                     "deviceid" to deviceId,
-                    "features" to "$features,0x1E",
-                    "model" to "AppleTV3,2", // AppleTV3,2 is widely compatible
-                    "srcvers" to "220.68",
-                    "flags" to "0x4",
-                    "vv" to "2",
-                    "pk" to "b07727d6f6cd6e08b58c98a7e206fc2848a9187319202e77840132b70f058043",
-                    "pi" to "b07727d6f6cd6e08b58c98a7e206fc2848a9187319202e77840132b70f058043"
+                    "model" to "AndroidTV",
+                    "name" to currentDeviceName,
+                    "version" to "1.0"
                 )
-                
-                val airplayService = ServiceInfo.create(
-                    "_airplay._tcp.local.",
-                    deviceName,
-                    AIRPLAY_PORT,
-                    0,
-                    0,
-                    airplayProps
-                )
-                jmdns?.registerService(airplayService)
-                Log.d(TAG, "Registered AirPlay service: $deviceName on port $AIRPLAY_PORT")
 
-                // 2. Register AirTunes/RAOP Service (_raop._tcp.local.)
-                // Name format MUST be "MAC@DeviceName" for RAOP
-                // MAC address must be without colons
-                val macNoColons = deviceId.replace(":", "")
-                val raopName = "$macNoColons@$deviceName"
-                
-                val raopProps = hashMapOf(
-                    "ch" to "2",
-                    "cn" to "0,1,2,3",
-                    "da" to "true",
-                    "et" to "0,1",
-                    "md" to "0,1,2",
-                    "pw" to "false",
-                    "sr" to "44100",
-                    "ss" to "16",
-                    "sv" to "false",
-                    "tp" to "UDP",
-                    "vn" to "65537",
-                    "vs" to "220.68",
-                    "sf" to "0x4",
-                    "am" to "AppleTV3,2"
-                )
-                
-                // NOTE: Use port 7000 (AirPlay) for RAOP too if 5000 is causing issues on some Macs
-                // But standard RAOP is 5000+. Let's stick to 5000 unless we see conflicts.
-                
-                val raopService = ServiceInfo.create(
-                    "_raop._tcp.local.",
-                    raopName,
-                    AIRTUNES_PORT,
-                    0, 
+                val customService = ServiceInfo.create(
+                    "_screen-mirror._tcp.local.",
+                    currentDeviceName,
+                    customPort,
                     0,
-                    raopProps
+                    0,
+                    customProps
                 )
-                jmdns?.registerService(raopService)
-                Log.d(TAG, "Registered RAOP service: $raopName on port $AIRTUNES_PORT")
+                jmdns?.registerService(customService)
+                Log.d(TAG, "Registered custom screen-mirror service: $currentDeviceName on port $customPort")
                 
                 // Keep the service alive
                 while (isRunning) {
@@ -134,7 +107,6 @@ class MDNSService(private val context: Context) {
                 while (addresses.hasMoreElements()) {
                     val address = addresses.nextElement()
                     // Filter for IPv4 and ensure it's a site-local address (192.168.x.x, 10.x.x.x, etc.)
-                    // This prevents picking up internal docker/vm IPs on some setups
                     if (!address.isLoopbackAddress && address is java.net.Inet4Address && address.isSiteLocalAddress) {
                         return address
                     }
@@ -160,20 +132,17 @@ class MDNSService(private val context: Context) {
     }
 
     private fun getDeviceIdAsMac(): String {
-        // Generate a stable MAC-like string from Android ID
-        val androidId = android.provider.Settings.Secure.getString(
+        val androidId = Settings.Secure.getString(
             context.contentResolver,
-            android.provider.Settings.Secure.ANDROID_ID
+            Settings.Secure.ANDROID_ID
         ) ?: "0000000000000000"
         
-        // Take first 12 chars or pad
         val cleanId = (androidId + "000000000000").take(12)
         val sb = StringBuilder()
         for (i in 0 until 12 step 2) {
             if (i > 0) sb.append(":")
             sb.append(cleanId.substring(i, i + 2))
         }
-        // Mac address should be uppercased for consistency
         return sb.toString().uppercase()
     }
     

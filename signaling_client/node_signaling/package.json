@@ -1,0 +1,12 @@
+{
+  "name": "local-signaling",
+  "version": "1.0.0",
+  "description": "Temporary local signaling server for testing the browser client",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.12.0"
+  }
+}
